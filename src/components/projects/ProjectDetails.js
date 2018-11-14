@@ -1,26 +1,51 @@
 import React from "react";
+import { connect } from "react-redux";
+import { firestoreConnect } from "react-redux-firebase";
+import { compose } from "redux";
 
 const ProjectDetails = props => {
-  const id = props.match.params.id;
-  return (
-    <div className="container section project-details">
-      <div className="card z-depth-1">
-        <div className="card-content">
-          <span className="card-title">Project Title - {id}</span>
-          <p>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Id, cum
-            asperiores? Id similique amet labore vitae alias inventore
-            consequuntur aperiam accusantium harum est, quam doloribus at a
-            nemo. Soluta, doloremque!
-          </p>
-        </div>
-        <div className="card-action grey lighten-3 grey-text">
-          <div>Posted by Jamie davis</div>
-          <div>12 November, 3pm</div>
+  const { project } = props;
+  if (project) {
+    return (
+      <div className="container section project-details">
+        <div className="card z-depth-0">
+          <div className="card-content">
+            <span className="card-title">{project.title}</span>
+            <p>{project.content}</p>
+          </div>
+          <div className="card-action grey lighten-4 grey-text">
+            <div>
+              Posted by {project.authorFirstName} {project.authorLastName}
+            </div>
+            <div>2nd September, 2am</div>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  } else {
+    return (
+      <div className="container center">
+        <p>Loading project...</p>
+      </div>
+    );
+  }
 };
 
-export default ProjectDetails;
+const mapStateToProps = (state, ownProps) => {
+  // console.log(state);
+  const id = ownProps.match.params.id;
+  const projects = state.firestore.data.projects;
+  const project = projects ? projects[id] : null;
+  return {
+    project: project
+  };
+};
+
+export default compose(
+  connect(mapStateToProps),
+  firestoreConnect([
+    {
+      collection: "projects"
+    }
+  ])
+)(ProjectDetails);
